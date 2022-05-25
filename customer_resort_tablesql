@@ -1,0 +1,83 @@
+select * from country;
+select * from resort;
+select * from customer2;
+----Query to find out country wise resort count.
+
+select count(resort_id),country_name
+from resort r , country c
+where r.country_id=c.country_id
+group by country_name;
+
+----Query to display country wise customer count.
+select country_name,count(cust_id)
+from country c , customer2 cu
+where c.country_id=cu.country_id
+group by country_name;
+
+------Query to display country, resort count and customer count.
+
+select C.country_name,nvl(customer_count.cust,0),nvl(resort_count.resort,0)
+from(select country_id,count(resort_id) resort
+from resort
+group by country_id)resort_count,(select country_id, count(cust_id) cust
+from customer2 cu
+group by country_id) customer_count,country C
+where resort_count.country_id(+)=C.country_id
+and customer_count.country_id(+)=C.country_id;
+
+---Display countries in which we don’t have any resorts.
+
+select country_name
+from country 
+where country_id not in(select country_id
+from resort);
+
+---Display countries in which we have minimum of 100 customers.
+
+select count(cust_id),country_name
+from country c , customer2 cu
+where c.country_id=cu.country_id
+group by country_name
+having count(cust_id)>3;
+----Display how many resorts we have in the country where resort ‘Beach front’ is
+select count(resort_id)
+from resort
+where country_id in (select country_id
+from resort
+where resort_name='blue life');
+
+insert into resort values(55,'guhantara','city center',101);
+commit;
+select * from resort;
+select * from customer2;
+
+---------Display customer names who are from US and do not have any phone numbers.
+select cust_name
+from customer2 cu,country c
+where cu.country_id=c.country_id
+and country_name='usa' and cust_phone is null;
+
+insert into customer2 values(9,'klaus',null,'chicago','13-apr-97',102);
+commit;
+select * from customer2;
+select * from country;
+-----Display Country name, resort name. Display all the countries in the list whether we have resortsor not.
+select country_name,resort_name
+from resort r , country c
+where c.country_id=r.country_id(+);
+
+-----Display Resort country name, resort name, customer name and customer country name.
+
+
+select resort_country_name.country_name,resort_country_name.resort_name,customer_country_name.country_name ,customer_country_name.cust_name
+from(select country_name,resort_name,rownum r
+from  country c,resort r
+where c.country_id=r.country_id) resort_country_name,
+(select country_name,cust_name,rownum r1
+from country c,customer2 cu
+where c.country_id=cu.country_id) customer_country_name
+where resort_country_name.r(+)=customer_country_name.r1;
+
+
+
+
